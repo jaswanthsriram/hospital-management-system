@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MediCore HMS{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if current_user %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">✚</span><span>MediCore <small>HOSPITAL SYSTEM</small></span></a>
+    <div class="side-label">WORKSPACE</div>
+    <nav>
+      <a class="{{ 'active' if request.endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">▦ <span>Overview</span></a>
+      <a class="{{ 'active' if request.endpoint == 'patients' else '' }}" href="{{ url_for('patients') }}">♡ <span>Patients</span></a>
+      <a class="{{ 'active' if request.endpoint == 'doctors' else '' }}" href="{{ url_for('doctors') }}">✚ <span>Doctors</span></a>
+      {% if current_role == 'Admin' %}<a class="{{ 'active' if request.endpoint == 'departments' else '' }}" href="{{ url_for('departments') }}">▤ <span>Departments</span></a>{% endif %}
+      <a class="{{ 'active' if request.endpoint in ['appointments','appointment_status'] else '' }}" href="{{ url_for('appointments') }}">▣ <span>Appointments</span></a>
+      {% if current_role in ['Admin','Doctor'] %}<a href="{{ url_for('treatments') }}">☷ <span>Treatments</span></a>{% endif %}
+      {% if current_role in ['Admin','Pharmacist'] %}<a href="{{ url_for('pharmacy') }}">▥ <span>Pharmacy & Stock</span></a>{% endif %}
+      {% if current_role in ['Admin','Doctor','Pharmacist'] %}<a href="{{ url_for('prescriptions') }}">▤ <span>Prescriptions</span></a>{% endif %}
+      {% if current_role in ['Admin','Receptionist'] %}<a href="{{ url_for('billing') }}">₹ <span>Billing & Payments</span></a>{% endif %}
+      <a class="{{ 'active' if request.endpoint == 'reports' else '' }}" href="{{ url_for('reports') }}">▥ <span>Reports & Analytics</span></a>
+      {% if current_role == 'Admin' %}<a href="{{ url_for('staff') }}">⚙ <span>Staff & Access</span></a>{% endif %}
+    </nav>
+    <div class="sidebar-bottom"><div class="avatar">{{ current_user[:1]|upper }}</div><div><strong>{{ current_user }}</strong><small>{{ current_role }}</small></div><a class="logout" href="{{ url_for('logout') }}" title="Log out">↗</a></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><div class="eyebrow">HOSPITAL MANAGEMENT</div><h1>{% block heading %}Overview{% endblock %}</h1></div><div class="top-right"><span class="status-dot"></span> System online <span class="top-date">{{ today_label if today_label else '' }}</span></div></header>
+    <section class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+      <footer>© {{ 2026 }} MediCore · Hospital Management System <span>Academic project · Demo data only</span></footer>
+    </section>
+  </main>
+</div>
+{% else %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div class="login-flashes">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% endwith %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+</body>
+</html>

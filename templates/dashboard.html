@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block heading %}Good day, {{ current_user.split()[0] }} <span class="heading-wave">✦</span>{% endblock %}
+{% block content %}
+<div class="welcome-banner"><div><span class="pill pill-light">HOSPITAL OVERVIEW</span><h2>Every detail. One healthier workflow.</h2><p>Track today's activity and keep your hospital running smoothly.</p></div><div class="banner-icon">✚</div><div class="banner-decoration"></div></div>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-top"><span>Total patients</span><span class="stat-icon teal">♡</span></div><div class="stat-value">{{ stats.patients }}</div><div class="stat-foot"><span class="tiny-dot"></span> Registered patient records</div></div>
+  <div class="stat-card"><div class="stat-top"><span>Medical team</span><span class="stat-icon blue">✚</span></div><div class="stat-value">{{ stats.doctors }}</div><div class="stat-foot"><span class="tiny-dot blue-dot"></span> Doctors on directory</div></div>
+  <div class="stat-card"><div class="stat-top"><span>Today's appointments</span><span class="stat-icon purple">▣</span></div><div class="stat-value">{{ stats.appointments }}</div><div class="stat-foot"><span class="tiny-dot purple-dot"></span> Scheduled for today</div></div>
+  <div class="stat-card"><div class="stat-top"><span>Payments received</span><span class="stat-icon green">₹</span></div><div class="stat-value">{{ stats.revenue|money }}</div><div class="stat-foot"><span class="tiny-dot green-dot"></span> Total recorded collections</div></div>
+</div>
+<div class="dashboard-grid">
+  <div class="panel">
+    <div class="panel-head"><div><h3>Appointment schedule</h3><p>Latest appointments in the system</p></div><a class="text-link" href="{{ url_for('appointments') }}">View all →</a></div>
+    <div class="table-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & time</th><th>Status</th></tr></thead><tbody>
+    {% for a in upcoming %}<tr><td><div class="person-cell"><span class="mini-avatar">{{ a.patient.name[:1] }}</span><strong>{{ a.patient.name }}</strong></div></td><td>{{ a.doctor.name }}</td><td><strong>{{ a.appointment_date.strftime('%d %b %Y') }}</strong><small class="cell-sub">{{ a.appointment_time.strftime('%I:%M %p') }}</small></td><td><span class="badge {{ a.status|lower }}">{{ a.status }}</span></td></tr>{% else %}<tr><td colspan="4" class="empty">No appointments yet. Add your first appointment.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+  <div class="panel stock-panel"><div class="panel-head"><div><h3>Stock watch</h3><p>Medicines needing attention</p></div><a class="text-link" href="{{ url_for('pharmacy') if current_role in ['Admin','Pharmacist'] else url_for('reports') }}">Open →</a></div>
+  {% for m in low_stock_items %}<div class="stock-row"><div class="medicine-icon">✚</div><div class="stock-info"><strong>{{ m.medicine_name }}</strong><small>{{ m.manufacturer or 'Manufacturer not listed' }}</small><div class="stock-bar"><span style="width:{{ [m.stock_quantity * 4, 100]|min }}%"></span></div></div><div class="stock-count {{ 'danger' if m.stock_quantity <= 5 else '' }}">{{ m.stock_quantity }}<small>left</small></div></div>{% else %}<div class="empty stock-empty">No low-stock medicines. Nice work!</div>{% endfor %}
+  <div class="stock-summary"><span>Inventory items</span><strong>{{ stats.medicines }}</strong><span>Low stock (≤ 10)</span><strong class="danger-text">{{ stats.low_stock }}</strong></div>
+  </div>
+</div>
+<div class="quick-grid"><a href="{{ url_for('patients') }}" class="quick-card"><span class="quick-icon teal">＋</span><div><strong>Register a patient</strong><small>Create a new patient record</small></div><span class="quick-arrow">↗</span></a><a href="{{ url_for('appointments') }}" class="quick-card"><span class="quick-icon blue">▣</span><div><strong>Book appointment</strong><small>Connect patient with a doctor</small></div><span class="quick-arrow">↗</span></a><a href="{{ url_for('reports') }}" class="quick-card"><span class="quick-icon purple">▥</span><div><strong>View reports</strong><small>Review visits and collections</small></div><span class="quick-arrow">↗</span></a></div>
+{% endblock %}
